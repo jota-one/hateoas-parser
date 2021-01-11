@@ -1,0 +1,39 @@
+{
+  "name": "@jota-one/hateoas-parser",
+  "version": "1.0.0",
+  "main": "index.js",
+  "module": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test:coverage": "npm run test -- --coverage",
+    "test:badges": "npm run test:coverage  && jest-coverage-badges output \"./badges\""
+  },
+  "description": "Javascript parser for HATEOAS rest APIs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jota-one/hateoas-parser.git"
+  },
+  "author": "Juniors at Work",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^24.8.0",
+    "jest-coverage-badges": "^1.1.2",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2"
+  },
+  "babel": {
+    "env": {
+      "test": {
+        "plugins": [
+          "transform-es2015-modules-commonjs"
+        ]
+      }
+    }
+  },
+  "jest": {
+    "collectCoverage": true,
+    "coverageReporters": [
+      "json-summary"
+    ],
+    "testURL": "http://localhost/"
+  }
+}
