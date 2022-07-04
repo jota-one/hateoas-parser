@@ -221,7 +221,7 @@ const createArrayParser = ({ url = '', params = [] } = {}) => pipe(
  */
 export const parseLinks = function (result) {
   result = result || {}
-  const indexArray = (result.index || result.links || [])
+  const indexArray = (result._links || result.index || result.links || [])
   return indexArray.reduce((acc, value) => {
     acc[value.rel] = value.href
     return acc

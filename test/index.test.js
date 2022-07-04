@@ -6,6 +6,7 @@ import {
 
 let index = {}
 let domainIndex = {}
+let halIndex = {}
 
 beforeAll(() => {
   index = {
@@ -61,6 +62,19 @@ beforeAll(() => {
       ]
     }
   }
+
+  halIndex = {
+    _links: [
+      {
+        rel: "documents",
+        href: "someUrl"
+      },
+      {
+        rel: "users",
+        href: "someOtherUrl"
+      }
+    ]
+  }
 })
 
 describe('Parse hateoas links list', () => {
@@ -72,6 +86,13 @@ describe('Parse hateoas links list', () => {
     expect(parseLinks(domainIndex.data)).toEqual({
       documents: 'http://api.domain.com/confirmation/admin/documents?someParam={someParam}{&otherParam,thirdParam}',
       other: 'http://api.domain.com/confirmation/admin/other'
+    })
+  })
+
+  test('hal index', () => {
+    expect(parseLinks(halIndex)).toEqual({
+      documents: 'someUrl',
+      users: 'someOtherUrl'
     })
   })
 })
