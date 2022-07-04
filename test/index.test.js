@@ -64,16 +64,14 @@ beforeAll(() => {
   }
 
   halIndex = {
-    _links: [
-      {
-        rel: "documents",
+    _links: {
+      documents: {
         href: "someUrl"
       },
-      {
-        rel: "users",
+      users: {
         href: "someOtherUrl"
       }
-    ]
+    }
   }
 })
 
