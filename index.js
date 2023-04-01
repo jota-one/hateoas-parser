@@ -1,5 +1,3 @@
-'use strict'
-
 /**
  * Small composition utility
  *

@@ -1,12 +1,24 @@
 {
   "name": "@jota-one/hateoas-parser",
   "version": "1.2.0",
-  "main": "index.js",
-  "module": "index.js",
+  "module": "./dist/index.js",
+  "main": "./dist/index.cjs",
+  "type": "module",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist/*",
+    "index.d.ts",
+    "index.js"
+  ],
   "scripts": {
-    "test": "jest",
-    "test:coverage": "npm run test -- --coverage",
-    "test:badges": "npm run test:coverage  && jest-coverage-badges output \"./badges\""
+    "build": "node build.cjs",
+    "test": "vitest"
   },
   "description": "Javascript parser for HATEOAS rest APIs",
   "repository": {
@@ -16,24 +28,8 @@
   "author": "Juniors at Work",
   "license": "MIT",
   "devDependencies": {
-    "jest": "^24.8.0",
-    "jest-coverage-badges": "^1.1.2",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2"
-  },
-  "babel": {
-    "env": {
-      "test": {
-        "plugins": [
-          "transform-es2015-modules-commonjs"
-        ]
-      }
-    }
-  },
-  "jest": {
-    "collectCoverage": true,
-    "coverageReporters": [
-      "json-summary"
-    ],
-    "testURL": "http://localhost/"
+    "@vitest/coverage-c8": "^0.29.8",
+    "esbuild": "^0.17.14",
+    "vitest": "^0.29.8"
   }
 }
