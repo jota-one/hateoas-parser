@@ -63,7 +63,7 @@ const withParamsAsArray = o => {
   return Object.assign({}, o, {
     replaceParams () {
       this.params = this.params.reduce((result, param) => {
-        let placeholder = /\{([a-zA-Z0-9_]+)\}/.exec(this.url)
+        let placeholder = /\{([a-zA-Z0-9_]+)}/.exec(this.url)
 
         if (placeholder && placeholder[0]) {
           this.url = this.url.replace(placeholder[0], param)
@@ -149,7 +149,7 @@ const UrlParserFactory = ({ url = '', params }: { url: string, params: Record<st
   },
 
   createSubResourcesList () {
-    const subResources = this.url.match(/([^{]*?)\w(?=\})/gmi) || []
+    const subResources = this.url.match(/([^{]*?)\w(?=})/gmi) || []
 
     this.subResources = subResources
       .filter(name => { return name.indexOf('/') === 0 })
@@ -177,7 +177,7 @@ const UrlParserFactory = ({ url = '', params }: { url: string, params: Record<st
       this.applyOptionalSubResources()
 
       // drop remaining not replaced optional params
-      this.url = this.url.replace(/([^{]*?)\w(?=\})/gmi, '').replace('{}', '')
+      this.url = this.url.replace(/([^{]*?)\w(?=})/gmi, '').replace('{}', '')
     }
     this.removeOptionalParamsDefinition()
     this.applyOptionalParams()
@@ -188,7 +188,7 @@ const UrlParserFactory = ({ url = '', params }: { url: string, params: Record<st
   },
 
   checkForErrors () {
-    const remainingParams = this.url.match(/([^{]*?)\w(?=\})/gmi)
+    const remainingParams = this.url.match(/([^{]*?)\w(?=})/gmi)
     if (remainingParams) {
       throw new Error('Some parameters (' + remainingParams.join(', ') + ') must be supplied in URL (' + this.url + ')')
     }
