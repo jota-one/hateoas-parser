@@ -1,3 +1,21 @@
+# v2.0.0 (Wed Oct 11 2023)
+
+#### 💥 Breaking Change
+
+- Release for TS version [#4](https://github.com/jota-one/hateoas-parser/pull/4) (joel@jota.one [@tadaii](https://github.com/tadaii) [@jorinho](https://github.com/jorinho))
+
+#### 🐛 Bug Fix
+
+- Typescript rewrite [#3](https://github.com/jota-one/hateoas-parser/pull/3) (joel@jota.one [@jorinho](https://github.com/jorinho))
+
+#### Authors: 3
+
+- Joel Poulin (joel@jota.one)
+- Jorinho ([@jorinho](https://github.com/jorinho))
+- Tadai ([@tadaii](https://github.com/tadaii))
+
+---
+
 # v1.3.0 (Sat Apr 01 2023)
 
 #### 🚀 Enhancement
