@@ -41,11 +41,7 @@ beforeAll(() => {
     "user_url": "https://api.github.com/users/{user}",
     "user_organizations_url": "https://api.github.com/user/orgs",
     "user_repositories_url": "https://api.github.com/users/{user}/repos{?type,page,per_page,sort}",
-    "user_search_url": "https://api.github.com/search/users?q={query}{&page,per_page,sort,order}",
-    "versionned_url": {
-      "default": "https://api.my.com/v1/endpoint",
-      "v2": "https://api.my.com/v2/new/endpoint"
-    }
+    "user_search_url": "https://api.github.com/search/users?q={query}{&page,per_page,sort,order}"
   }
 
   domainIndex = {
@@ -201,19 +197,5 @@ describe('Get links with querystring parameters (array provided)', () => {
 
   it('optional querystring (some parameters provided)', () => {
     expect(getEndpoint(index, 'current_user_repositories_url', ['js', 2])).toEqual('https://api.github.com/user/repos?type=js&page=2')
-  })
-})
-
-describe('Get a URL from a versionned rel', () => {
-  it('without any version parameter passed', () => {
-    expect(getEndpoint(index, 'versionned_url')).toEqual('https://api.my.com/v1/endpoint')
-  })
-
-  it('with a version parameter passed', () => {
-    expect(getEndpoint(index, 'versionned_url', null, 'v2')).toEqual('https://api.my.com/v2/new/endpoint')
-  })
-
-  it('with a non-existing version parameter passed', () => {
-    expect(getEndpoint(index, 'versionned_url', null, 'v42')).toEqual('')
   })
 })

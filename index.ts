@@ -1,10 +1,14 @@
-/**
- * Small composition utility
- *
- * @param {...Function} fns
- * @returns {Function}
- */
-const pipe = (...fns) => x => fns.reduce((y, f) => f(y), x)
+export type HalObject = {
+  href: string
+}
+
+export type HateoasObject = {
+  rel: string
+  href: string
+}
+export type HateoasResource = Record<'_links' | 'index' | 'links', Record<string, HalObject> | HateoasObject[]>
+
+const pipe = (...fns: Function[]): Function => x => fns.reduce((y, f) => f(y), x)
 
 /**
  * Mixin to handle parameters replacement when an Object is provided
@@ -59,7 +63,7 @@ const withParamsAsArray = o => {
   return Object.assign({}, o, {
     replaceParams () {
       this.params = this.params.reduce((result, param) => {
-        let placeholder = /\{([a-zA-Z0-9_]+)\}/.exec(this.url)
+        let placeholder = /\{([a-zA-Z0-9_]+)}/.exec(this.url)
 
         if (placeholder && placeholder[0]) {
           this.url = this.url.replace(placeholder[0], param)
@@ -92,24 +96,42 @@ const withParamsAsArray = o => {
 
 /**
  * Main Factory. Contains all common methods to parse a HATEOAS url
- *
- * @param {String} url
- * @param {Array|Object} params
- * @returns {Object}
  */
-const UrlParserFactory = ({ url = '', params }) => ({
+const UrlParserFactory = ({ url = '', params }: { url: string, params: Record<string, string> | string[] }) => ({
   optionalParams: {},
   subResources: [],
-  url: url,
-  params: params,
+  url,
+  params,
 
-  getOptionalParamsPosition () {
-    let optionalPos = this.url.indexOf('{&')
-    if (optionalPos === -1) {
-      optionalPos = this.url.indexOf('{?')
+  // abstract methods (overriden by mixin)
+  computeOptionalParamsNames (names: string[]) {
+    return {}
+  },
+  applyOptionalSubResources () {},
+  replaceParams() {},
+
+  // private
+  applyOptionalParams () {
+    if (Object.keys(this.optionalParams).length === 0) {
+      return
     }
 
-    return optionalPos
+    const connector = this.url.indexOf('?') > -1 ? '&' : '?'
+    const querystring = Object.keys(this.optionalParams).map(name => {
+      return name + '=' + this.optionalParams[name]
+    }).join('&')
+
+    this.url += connector + querystring
+  },
+
+  getOptionalParamsPosition () {
+    if (this.url.includes('{&')) {
+      return this.url.indexOf('{&')
+    } else if (this.url.includes('{?')) {
+      return this.url.indexOf('{?')
+    }
+
+    return -1
   },
 
   createOptionalParamsHash () {
@@ -127,7 +149,7 @@ const UrlParserFactory = ({ url = '', params }) => ({
   },
 
   createSubResourcesList () {
-    const subResources = this.url.match(/([^{]*?)\w(?=\})/gmi) || []
+    const subResources = this.url.match(/([^{]*?)\w(?=})/gmi) || []
 
     this.subResources = subResources
       .filter(name => { return name.indexOf('/') === 0 })
@@ -150,31 +172,15 @@ const UrlParserFactory = ({ url = '', params }) => ({
     }
   },
 
-  applyOptionalParams () {
-    if (Object.keys(this.optionalParams).length === 0) {
-      return
-    }
-
-    const connector = this.url.indexOf('?') > -1 ? '&' : '?'
-    const querystring = Object.keys(this.optionalParams).map(name => {
-      return name + '=' + this.optionalParams[name]
-    }).join('&')
-
-    this.url += connector + querystring
-  },
-
   buildUrl () {
     if (this.subResources.length > 0) {
       this.applyOptionalSubResources()
 
       // drop remaining not replaced optional params
-      this.url = this.url.replace(/([^{]*?)\w(?=\})/gmi, '').replace('{}', '')
+      this.url = this.url.replace(/([^{]*?)\w(?=})/gmi, '').replace('{}', '')
     }
-    const position = this.getOptionalParamsPosition();
-    if (position > -1) {
-      this.url = this.url.slice(0, position)
-      this.applyOptionalParams()
-    }
+    this.removeOptionalParamsDefinition()
+    this.applyOptionalParams()
   },
 
   getUrl () {
@@ -182,7 +188,7 @@ const UrlParserFactory = ({ url = '', params }) => ({
   },
 
   checkForErrors () {
-    const remainingParams = this.url.match(/([^{]*?)\w(?=\})/gmi)
+    const remainingParams = this.url.match(/([^{]*?)\w(?=})/gmi)
     if (remainingParams) {
       throw new Error('Some parameters (' + remainingParams.join(', ') + ') must be supplied in URL (' + this.url + ')')
     }
@@ -213,12 +219,9 @@ const createArrayParser = ({ url = '', params = [] } = {}) => pipe(
 
 /**
  * Simple function to convert a raw HATEOAS index result to a more usable key-value Hash
- *
- * @param {Object} result
- * @returns {Object}
  */
-export const parseLinks = function (result) {
-  result = result || {}
+export const parseLinks = function (result: HateoasResource) {
+  result = result || {} as HateoasResource
   let indexContent = (result._links || result.index || result.links || [])
   if (!Array.isArray(indexContent)) {
     return Object.entries(indexContent).reduce((acc, [rel, def]) => {
@@ -232,9 +235,9 @@ export const parseLinks = function (result) {
   }, {})
 }
 
-export const parseUrl = function (url, params) {
+export const parseUrl = function (url: string, params: Record<string, string> | string[]) {
   params = params || {}
-  let parser = Array.isArray(params) ? createArrayParser({url, params}) : createObjectParser({url, params})
+  let parser = Array.isArray(params) ? createArrayParser({ url, params }) : createObjectParser({ url, params })
 
   // replace mandatory params
   parser.replaceParams()
@@ -256,32 +259,18 @@ export const parseUrl = function (url, params) {
 
 /**
  * Format an endpoint by resolving eventual required and optional parameters
- *
- * @param {Object} index
- * @param {String} rel
- * @param {Object|Array=} params
- * @param {String=} version
- * @returns {String}
  */
-export const getEndpoint = function (index, rel, params, version) {
-  version = version || 'default'
+export const getEndpoint = function (index: Record<string, string>, rel: string, params?: Record<string, string> | string[]) {
   let url = index[rel]
-  if (typeof url === 'object') {
-    url = url[version]
-  }
   return parseUrl(url || '', params)
 }
 
 /**
  * Format an endpoint by simply removing all optional or required paramaters in the querystring
- *
- * @param {Object} index
- * @param {String} rel
- * @returns {String}
  */
-export const getCleanEndpoint = function (index, rel) {
+export const getCleanEndpoint = function (index: Record<string, string>, rel: string) {
   let url = index[rel] || ''
-  let parser = createObjectParser({url})
+  let parser = createObjectParser({ url })
 
   parser.removeOptionalParamsDefinition()
   parser.removeQueryString()

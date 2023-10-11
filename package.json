@@ -17,7 +17,7 @@
     "index.js"
   ],
   "scripts": {
-    "build": "node build.cjs",
+    "build": "node build.cjs & tsc",
     "test": "vitest"
   },
   "description": "Javascript parser for HATEOAS rest APIs",
@@ -28,8 +28,9 @@
   "author": "Juniors at Work",
   "license": "MIT",
   "devDependencies": {
-    "@vitest/coverage-c8": "^0.29.8",
-    "esbuild": "^0.17.14",
-    "vitest": "^0.29.8"
+    "@vitest/coverage-c8": "^0.33.0",
+    "esbuild": "^0.19.3",
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.4"
   }
 }
